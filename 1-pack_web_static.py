@@ -2,21 +2,18 @@
 """
 Generate .tgz files
 """
-from os import path
-from datetime import datetime as dt
+from time import strftime
 from fabric.api import local
 
-
 def do_pack():
-    """ generate .tgz file"""
-    archived = dt.utcnow()
-    if path.isdir("versions") is False:
-        if local("mkdir -p versions").failed is True:
-            return None
-    p = "versions/web_static_{}{}{}{}{}{}.tgz".format(
-        archived.year, archived.month, archived.day,
-        archived.hour, archived.minute, archived.second)
-    if local("tar -cvzf {} web_static".format(
-            p)).failed is True:
+    """Generate a .tgz file of web_static folder"""
+    try:
+        # create versions folder
+        local("mkdir -p versions")
+        # compress to versions folder
+        time = f"{strftime('%Y%m%d%H%M%S')}"
+        local(f"tar -cvzf versions/web_static_{time}.tgz web_static/")
+        # return filename
+        return f'verizon/web_static_{time}.tgz'
+    except:
         return None
-    return p
