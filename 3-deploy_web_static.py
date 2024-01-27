@@ -11,7 +11,6 @@ env.hosts = ['100.25.162.172', '54.152.165.14']
 env.user = "ubuntu"
 
 
-
 def do_pack():
     """ generate .tgz file"""
     archived = dt.utcnow()
