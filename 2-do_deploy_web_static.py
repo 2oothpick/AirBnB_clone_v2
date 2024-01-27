@@ -18,7 +18,7 @@ def do_pack():
         # create versions folder
         local("mkdir -p versions")
         # compress to versions folder
-        time = f"{strftime('%Y%m%d%H%M%S')}"
+        time = f"{strftime('%Y%M%d%H%M%S')}"
         local(f"tar -cvzf versions/web_static_{time}.tgz web_static/")
         # return filename
         return f'verizon/web_static_{time}.tgz'
@@ -38,21 +38,19 @@ def do_deploy(archive_path):
         # upload file to /tmp/
         put(archive_path, f"/tmp/{filetag}")
         # create target directory
-        run(f"mkdir -p {new_path}")
+        run(f"sudo mkdir -p {new_path}")
         # uncompress folders to target_directory
-        run(f"tar -xzf /tmp/{filetag} -C {new_path}")
+        run(f"sudo tar -xzf /tmp/{filetag} -C {new_path}")
         # delete archive
-        run(f"rm /tmp/{filetag}")
+        run(f"sudo rm /tmp/{filetag}")
         # move files from web_static to root of target folder
-        run(f"mv {new_path}web_static/* {new_path}")
+        run(f"sudo mv {new_path}web_static/* {new_path}")
         # delete empty web_static directory
-        run(f"rm -rf {new_path}web_static")
+        run(f"sudo rm -rf {new_path}web_static")
         # delete sym link /data/web_static/current
-        run(f"rm -rf {sym_link}")
-        # create new sym link 
-        run(f"ln -s {new_path} {sym_link}")
-
+        run(f"sudo rm -rf {sym_link}")
+        # create new sym link
+        run(f"sudo ln -s {new_path} {sym_link}")
         print("New version deployed!")
         return True
-
     return False
