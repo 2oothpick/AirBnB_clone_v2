@@ -3,3 +3,14 @@ Pipfile.lock
 test.py
 templates/test.html
 
+env/bin/activate
+env/bin/activate.csh
+env/bin/activate.fish
+env/bin/easy_install
+env/bin/pip3.10
+env/bin/pip3
+env/bin/pip
+env/bin/fab
+env/bin/easy_install-3.10
+env/bin/Activate.ps1
+fabfile.py
