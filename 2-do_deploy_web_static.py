@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 """
-Generate .tgz files and deploys it to 
+Generate .tgz files and deploys it to
 web servers
 """
 
@@ -28,30 +28,29 @@ def do_pack():
 
 def do_deploy(archive_path):
     """
-        Distribute archive.
+    Deploys archive to both servers
     """
     if os.path.exists(archive_path):
-        archived_file = archive_path[9:]
-        newest_version = "/data/web_static/releases/" + archived_file[:-4]
-        archived_file = "/tmp/" + archived_file
+        filetag = archive_path.split("/")[-1]
+        tag = filetag.split(".")[0]
+        new_path = f"/data/web_static/releases/{tag}/"
+        sym_link = "/data/web_static/current"
         # upload file to /tmp/
-        put(archive_path, "/tmp/")
+        put(archive_path, f"/tmp/{filetag}")
         # create target directory
-        run("sudo mkdir -p {}".format(newest_version))
+        run(f"mkdir -p {new_path}")
         # uncompress folders to target_directory
-        run("sudo tar -xzf {} -C {}/".format(archived_file,
-                                             newest_version))
+        run(f"tar -xzf /tmp/{filetag} -C {new_path}")
         # delete archive
-        run("sudo rm {}".format(archived_file))
+        run(f"rm /tmp/{filetag}")
         # move files from web_static to root of target folder
-        run("sudo mv {}/web_static/* {}".format(newest_version,
-                                                newest_version))
+        run(f"mv {new_path}web_static/* {new_path}")
         # delete empty web_static directory
-        run("sudo rm -rf {}/web_static".format(newest_version))
+        run(f"rm -rf {new_path}web_static")
         # delete sym link /data/web_static/current
-        run("sudo rm -rf /data/web_static/current")
-        # create new sym link between /data/web_static/releases/arch and /data/web_static/current
-        run("sudo ln -s {} /data/web_static/current".format(newest_version))
+        run(f"rm -rf {sym_link}")
+        # create new sym link 
+        run(f"ln -s {new_path} {sym_link}")
 
         print("New version deployed!")
         return True
