@@ -5,6 +5,7 @@ Generate .tgz files
 from time import strftime
 from fabric.api import local
 
+
 def do_pack():
     """Generate a .tgz file of web_static folder"""
     try:
