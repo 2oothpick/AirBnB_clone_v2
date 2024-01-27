@@ -9,8 +9,8 @@ from datetime import datetime as dt
 from fabric.api import run, env, put, local
 
 
+env.hosts = ['100.25.162.172', '54.152.165.14']
 env.user = "ubuntu"
-env.hosts = ["18.210.28.31", "3.236.121.230"]
 
 
 def do_pack():
@@ -74,25 +74,15 @@ def deploy():
 
 
 def do_clean(number=0):
-    """clean outdated versions"""
-    n = 1 if int(number) <= 0 else int(number)
-    dir_name = "versions/"
-    local_archive = filter(os.path.isfile, glob.glob(dir_name+"*"))
-    local_archive = sorted(local_archive, key=os.path.getmtime)
-    for i in range(2 * n):
-        try:
-            local_archive.pop()
-        except IndexError:
-            pass
-    for item in local_archive:
-        local("rm -f {}".format(item))
-    remote_archive = run("ls -1t /data/web_static/releases/")
-    remote_archive = [str(n)[:-1] if str(n)[-1] == '\r' else str(n)
-                      for n in remote_archive.split("\n")]
-    for i in range(n):
-        try:
-            remote_archive.pop()
-        except IndexError:
-            pass
-    for item in remote_archive:
-        run("rm -rf /data/web_static/releases/{}/".format(item))
+    """ CLEANS """
+
+    number = int(number)
+
+    if number == 0:
+        number = 2
+    else:
+        number += 1
+
+    local('cd versions ; ls -t | tail -n +{} | xargs rm -rf'.format(number))
+    path = '/data/web_static/releases'
+    run('cd {} ; ls -t | tail -n +{} | xargs rm -rf'.format(path, number))
