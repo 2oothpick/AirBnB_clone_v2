@@ -5,7 +5,7 @@ web servers
 """
 
 from time import strftime
-from fabric.api import *
+from fabric.api import env, run, put
 import os
 
 env.hosts = ['100.25.162.172', '54.152.165.14']
@@ -13,44 +13,40 @@ env.user = "ubuntu"
 
 
 def do_pack():
-    """Generate a .tgz file of web_static folder"""
+    """
+    generates .tgz archive folder
+    """
     try:
-        # create versions folder
         local("mkdir -p versions")
-        # compress to versions folder
-        time = f"{strftime('%Y%M%d%H%M%S')}"
-        local(f"tar -cvzf versions/web_static_{time}.tgz web_static/")
-        # return filename
-        return f'verizon/web_static_{time}.tgz'
-    except:
+        timefrmat = strftime("%Y%M%d%H%M%S")
+        filenme = "versions/web_static_{}.tgz".format(timefrmat)
+        local("tar -cvzf {} web_static/".format(filenme))
+        return filenme
+    except Exception:
         return None
 
 
 def do_deploy(archive_path):
     """
-    Deploys archive to both servers
+    distributes an archive to your web servers
     """
-    if os.path.exists(archive_path):
-        filetag = archive_path.split("/")[-1]
-        tag = filetag.split(".")[0]
-        new_path = f"/data/web_static/releases/{tag}/"
-        sym_link = "/data/web_static/current"
-        # upload file to /tmp/
-        put(archive_path, f"/tmp/{filetag}")
-        # create target directory
-        run(f"sudo mkdir -p {new_path}")
-        # uncompress folders to target_directory
-        run(f"sudo tar -xzf /tmp/{filetag} -C {new_path}")
-        # delete archive
-        run(f"sudo rm /tmp/{filetag}")
-        # move files from web_static to root of target folder
-        run(f"sudo mv {new_path}web_static/* {new_path}")
-        # delete empty web_static directory
-        run(f"sudo rm -rf {new_path}web_static")
-        # delete sym link /data/web_static/current
-        run(f"sudo rm -rf {sym_link}")
-        # create new sym link
-        run(f"sudo ln -s {new_path} {sym_link}")
-        print("New version deployed!")
+    if os.path.isfile(archive_path) is False:
+        return False
+    try:
+        filenme = archive_path.split("/")[-1]
+        nme = filenme.split(".")[0]
+        path_r = "/data/web_static/releases/{}/".format(nme)
+        path_c = "/data/web_static/current"
+        put(archive_path, "/tmp/{}".format(filenme))
+        """put(archive_path, "/tmp/")"""
+        run("mkdir -p {}".format(path_r))
+        run("tar -xzf /tmp/{} -C {}".format(filenme, path_r))
+        run("rm /tmp/{}".format(filenme))
+        run("mv {}web_static/* {}".format(path_r, path_r))
+        run("rm -rf {}web_static".format(path_r))
+        run("rm -rf {}".format(path_c))
+        run("ln -s {} {}".format(path_r, path_c))
+        print('New version deployed!')
         return True
-    return False
+    except Exception:
+        return False
